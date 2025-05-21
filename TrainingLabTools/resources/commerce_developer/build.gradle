@@ -1,0 +1,197 @@
+apply plugin: 'installer-platform-plugin'
+apply plugin: 'installer-addon2-plugin'
+
+def pl = platform {
+    localProperties {
+        property 'build.parallel', 'true'
+        property 'initialpassword.admin', 'nimda'
+        property 'smartedittools.only.build.once', 'true'
+
+//from here all coming from custom.properties of spartacussampledata extension
+
+        property 'sop.post.url', 'https://localhost:9002/acceleratorservices/sop-mock/process'
+        property 'occ.rewrite.overlapping.paths.enabled', 'true'
+
+        property 'corsfilter.default.allowedOrigins', '*'
+        property 'corsfilter.acceleratorservices.allowedOrigins', '*'
+        property 'corsfilter.permissionswebservices.allowedOrigins', '*'
+
+        property 'corsfilter.commercewebservices.allowedOrigins', '*'
+        property 'corsfilter.commercewebservices.allowedHeaders', 'origin content-type accept authorization cache-control x-anonymous-consents x-profile-tag-debug x-consent-reference'
+        property 'corsfilter.commercewebservices.exposedHeaders', 'x-anonymous-consents'
+
+        // property 'corsfilter.assistedservicewebservices.allowedOrigins', '*'
+        // property 'corsfilter.assistedservicewebservices.allowedHeaders', 'origin content-type accept authorization cache-control x-anonymous-consents x-profile-tag-debug x-consent-reference'
+        // property 'corsfilter.assistedservicewebservices.exposedHeaders', 'x-anonymous-consents'
+
+        property 'mockup.payment.label.billTo.region', 'billTo_state'
+        property 'mockup.payment.label.billTo.phoneNumber', 'billTo_phoneNumber'
+
+        property 'task.polling.interval.min', '0'
+
+        property 'smarteditaddon.dynamicattribute.enabled', 'true'
+
+        property 'corsfilter.commercewebservices.allowedHeaders', 'origin content-type accept authorization cache-control x-anonymous-consents x-profile-tag-debug x-consent-reference occ-personalization-id occ-personalization-time'
+        property 'corsfilter.commercewebservices.exposedHeaders', 'x-anonymous-consents occ-personalization-id occ-personalization-time'
+
+    }
+
+    afterSetup {
+        ensureAdminPasswordSet()
+    }    
+
+    extensions {
+
+        extName 'spartacussampledata'
+
+        extName 'adaptivesearchsolr'
+        extName 'adaptivesearchbackoffice'
+        extName 'adaptivesearchwebservices'
+        extName 'commerceservicesbackoffice'
+        extName 'solrfacetsearchbackoffice'
+        extName 'solrserver'
+
+        extName 'yacceleratorbackoffice'
+        extName 'yacceleratorinitialdata'
+        extName 'yacceleratorfulfilmentprocess'
+        extName 'yacceleratorstorefront'
+
+		extName 'commercewebservices'
+        extName 'commercewebservicescommons'
+        
+        extName 'yocc'
+        
+        extName 'webservicescommons'
+        extName 'ywebservices'
+
+        extName 'swaggerintegration'
+
+        extName 'electronicsstore'
+
+        extName 'rulebuilderbackoffice'
+        extName 'couponbackoffice'
+        extName 'droolsruleengineservices'
+        extName 'couponfacades'
+        extName 'couponservices'
+        extName 'customercouponservices'
+
+        extName 'cmswebservices'
+
+        extName 'cmsocc'
+        extName 'acceleratorocc'
+        extName 'customercouponocc'
+        extName 'customerinterestsocc'
+        extName 'customerticketingocc'
+
+        extName 'previewwebservices'
+        extName 'smarteditwebservices'
+        extName 'cmssmarteditwebservices'
+        extName 'permissionswebservices'
+        extName 'smarteditaddon'
+        extName 'cmssmartedit'
+        extName 'cmsbackoffice'
+
+        extName 'previewpersonalizationweb'
+        extName 'personalizationcmsweb'
+        extName 'personalizationsmartedit'
+        extName 'personalizationpromotionssmartedit'
+        extName 'personalizationsampledataaddon'
+        extName 'personalizationpromotions'
+        extName 'personalizationpromotionsweb'
+        extName 'personalizationservicesbackoffice'
+        extName 'personalizationpromotionsbackoffice'
+        extName 'personalizationcmsbackoffice'
+        extName 'personalizationintegrationbackoffice'
+        extName 'personalizationsearchbackoffice'
+        extName 'personalizationsearchsmartedit'
+        extName 'personalizationsearchweb'
+
+        extName 'pcmbackofficesamplesaddon'
+
+        extName 'customerinterestsaddon'
+        extName 'stocknotificationaddon'
+
+    }
+
+    addons {
+        forStoreFronts('yacceleratorstorefront') {
+            names('smarteditaddon', 'pcmbackofficesamplesaddon', 'customerinterestsaddon', 'stocknotificationaddon')
+            template 'yacceleratorstorefront'
+        }
+    }
+}
+
+task createDEVExt() {
+    doLast {
+        def prePlatform = platformFactory.createPlatform()
+        prePlatform.createConfigDirIfNotExist()
+        prePlatform.resetConfig()
+
+        prePlatform.createExtension {
+            templateName 'yempty'
+            extensionName 'dev'
+            packageName 'de.hybris.training.dev'
+        }
+    }
+}
+
+task copyProjectdata(type: Copy) {
+    mustRunAfter createDEVExt
+    from file("projectdata-dev.impex")
+    into file ("${suiteHome}/hybris/bin/custom/dev/resources/impex")
+}
+
+//Ken: must make sure the dev extension is among the last extensions to load
+task copyExtensionInfo(type: Copy) {
+    mustRunAfter copyProjectdata
+    from file("extensioninfo.xml")
+    into file ("${suiteHome}/hybris/bin/custom/dev")
+}
+
+task copySpartacusSampleExtension(type: Copy){
+    mustRunAfter copyExtensionInfo
+    from file("spartacussampledata")
+    into file ("${suiteHome}/hybris/bin/custom/spartacussampledata")
+}
+
+task configureDEVExt(dependsOn: [createDEVExt,copyProjectdata,copyExtensionInfo,copySpartacusSampleExtension]) {
+    pl.extensions {
+        extName 'dev'
+    }
+}
+
+task setup(dependsOn: [configureDEVExt]) {
+    doLast {
+        pl.setup()
+    }
+}
+
+task buildSystem(dependsOn: setup) {
+    doLast {
+        pl.build()
+    }
+}
+
+task initialize(dependsOn: buildSystem) {
+    doLast {
+        pl.initialize()
+    }
+}
+
+task start {
+    doLast {
+        pl.start()
+    }
+}
+
+task startInBackground {
+    doLast {
+        pl.startInBackground()
+    }
+}
+
+task stopInBackground {
+    doLast {
+        pl.stopInBackground()
+    }
+}

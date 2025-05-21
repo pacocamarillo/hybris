@@ -1,0 +1,42 @@
+$productCatalog=electronicsProductCatalog
+$systemName=ElectronicsClassification;
+$systemVersion=1.0;
+
+$classSystemVersion=systemVersion(catalog(id[default='$systemName']),version[default='1.0'])[unique=true]
+$classCatalogVersion=catalogversion(catalog(id[default='$systemName']),version[default='1.0'])[unique=true,default='$systemName:1.0']
+$class=classificationClass(ClassificationClass.code,$classCatalogVersion)[unique=true]
+$attribute=classificationAttribute(code,$classSystemVersion)[unique=true]
+
+# Delete Products
+REMOVE Product[batchmode=true];code[unique=true]
+;8942944779_red
+;8942944779_blue
+;8942944779
+
+
+# Delete Variant Value Category
+REMOVE Category[batchmode=true];code[unique=true]
+;Camcorders_Red
+;Camcorders_Blue
+;Camcorders_Color
+;action-cam
+
+# Delete Class Attribute Assignment
+REMOVE ClassAttributeAssignment;$class;$attribute
+;advancedaudio;noiseFree
+
+# Delete Classification Attributes
+REMOVE ClassificationAttribute;code[unique=true];$classSystemVersion
+;noiseFree
+
+# Delete Classifying Category
+REMOVE ClassificationClass;code[unique=true];$classCatalogVersion
+;advancedaudio
+
+# Delete Cronjob
+REMOVE CatalogVersionSyncCronJob;code[unique=true]
+;electronicsSyncCronJob
+
+# Delete Job
+REMOVE CatalogVersionSyncJob;code[unique=true]
+;electronicsSyncJob

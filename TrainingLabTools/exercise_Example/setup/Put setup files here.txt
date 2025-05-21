@@ -1,0 +1,1 @@
+Put your setup files in this directory, and delete this file.

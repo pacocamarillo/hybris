@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+	<alias name="defaultTrainingservicesService" alias="trainingservicesService"/>
+    <bean id="defaultTrainingservicesService" class="my.commerce.trainingservices.service.impl.DefaultTrainingservicesService">
+        <property name="modelService" ref="modelService"/>
+        <property name="mediaService" ref="mediaService"/>
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+
+	<alias alias="customerAccountService" name="defaultCustomizedCustomerAccountService"/>
+	<bean id="defaultCustomizedCustomerAccountService" class="my.commerce.trainingservices.service.impl.DefaultCustomizedCustomerAccountService"
+			parent="defaultCustomerAccountService">
+			<property name="commerceConsentService" ref="commerceConsentService"/>
+	</bean>
+
+
+</beans>

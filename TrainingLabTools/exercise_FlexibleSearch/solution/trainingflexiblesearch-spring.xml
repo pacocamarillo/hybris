@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	
+    <bean id="trainingflexiblesearchSystemSetup" class="my.commerce.trainingflexiblesearch.setup.TrainingflexiblesearchSystemSetup">
+        <!-- constructor arg injection example -->
+        <constructor-arg ref="trainingflexiblesearchService"/>
+    </bean>
+
+    <bean id="trainingflexiblesearchService" class="my.commerce.trainingflexiblesearch.service.impl.DefaultTrainingflexiblesearchService">
+        <!-- setter injection example -->
+        <property name="modelService" ref="modelService"/>
+        <property name="mediaService" ref="mediaService"/>
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+			
+    <!-- TODO Step 1 -->
+    <bean name="defaultGenericCustomerDao"
+		class="de.hybris.platform.servicelayer.internal.dao.DefaultGenericDao">
+		<constructor-arg
+			value="#{T(de.hybris.platform.core.model.user.CustomerModel)._TYPECODE}" />
+	</bean>
+		
+	<!-- TODO Step 5 -->
+	<alias alias="myOrderDao" name="defaultMyOrderDao" />
+	<bean id="defaultMyOrderDao"
+	      class="my.commerce.trainingflexiblesearch.dao.impl.MyOrderDaoImpl" 
+	      parent="abstractItemDao">
+	</bean>
+</beans>

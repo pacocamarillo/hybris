@@ -1,0 +1,49 @@
+# Macros
+$productCatalog=electronicsProductCatalog
+$catalogVersion=catalogversion(catalog(id[default=$productCatalog]),version[default='Staged'])[unique=true,default=$productCatalog:Staged]
+$supercategories=supercategories(code, $catalogVersion)
+$baseProduct=baseProduct(code,$catalogVersion)
+$approved=approvalstatus(code)[default='approved']
+$priority=variantCategoryPriority(code)
+
+# Language
+$lang=en
+
+
+### Creating a VariantCategory using ImpEx
+
+# Insert Variant Category
+INSERT_UPDATE VariantCategory;code[unique=true];name;$supercategories;hasImage;$catalogVersion;allowedPrincipals(uid)[default='customergroup']
+#;B2C_Color;Color;;true
+;B2C_Fit;Fit;B2C_Color;false
+;B2C_Size;Size;B2C_Fit;false
+
+
+### Creating VariantValueCategory instance susing ImpEx
+
+# Insert variant value category
+INSERT_UPDATE VariantValueCategory;code[unique=true];name;$supercategories;sequence;$catalogVersion;allowedPrincipals(uid)[default='customergroup']
+;B2C_2P;2 Pockets;B2C_Fit;1
+;B2C_3P;3 Pockets;B2C_Fit;2
+;B2C_4P;4 Pockets;B2C_Fit;3
+;B2C_S;S;B2C_Size;1
+;B2C_M;M;B2C_Size;2
+;B2C_L;L;B2C_Size;3
+;B2C_XL;XL;B2C_Size;4
+;B2C_Black;Black;B2C_Color;4
+
+
+### Creating GenericVariantProduct instances using ImpEx
+
+# Insert Products
+INSERT_UPDATE Product;code[unique=true];$supercategories;manufacturerName;variantType(code);unit(code)[default=pieces];$catalogVersion
+;24097000;brand_10,B2C_Color,B2C_Fit,B2C_Size;CANON;GenericVariantProduct
+
+# Update product name and description
+UPDATE Product;code[unique=true];name[lang=$lang];description[lang=$lang];$approved;$catalogVersion
+;24097000;Photographer Jacket Organizer;Photographer Jacket Organizer is the smart choice for outdoor photography;approved
+
+# Update generic variant product information
+INSERT_UPDATE GenericVariantProduct;code[unique=true];$baseProduct;name;summary;ean;$supercategories;description;$catalogVersion
+;24097000_1;24097000;Photographer Jacket Organizer 3 Pockets Black L;Photographer Jacket Organizer Color Black, Size L;829024859728;B2C_3P,B2C_L,B2C_Black;This is a product long description....
+;24097000_2;24097000;Photographer Jacket Organizer 4 Pockets Red M;Photographer Jacket Organizer Color Red, Size M;829024859728;B2C_4P,B2C_M,B2C_Red;This is a product long description....

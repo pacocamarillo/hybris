@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Product Modeling exercise tasks">
+	<loadproperties srcfile="../lib/exercise.properties" />
+	
+	<!-- Import stop-server and clean-slate targets -->
+	<import file="../lib/utility.xml"/>
+	
+	<path id="basedir.path">
+		<pathelement path="${basedir}" />
+	</path>
+	<pathconvert property="trainingLabToolDir" targetos="unix" refid="basedir.path" />
+
+	<!--variables -->
+    <property name="solution.source.dir" value="solution/" />
+
+
+	<!--###### Product Modeling ######-->
+	<target name="solution" description="copy finished Product Modeling exercise" depends="stop-server" >
+
+        <!-- Reset system back to a clean slate (state following setup) -->
+        <antcall target="clean-slate"/>
+        
+		<!-- Import related categories and products in a single import action -->
+		<ant antfile="build.xml" target="importImpex" dir="${hybris.root.path}/bin/platform" >
+			<property name="resource" value="${trainingLabToolDir}/${solution.source.dir}/solution.impex" />
+        </ant>
+
+	    <!-- Execute synchronization -->
+	    <ant antfile="build.xml" target="runcronjob" dir="${hybris.root.path}/bin/platform" >
+			<property name="cronjob" value="electronicsSyncCronJob" />
+	    </ant>
+		
+
+	</target>
+	<!--###### Product Modeling end ######-->
+
+	<target name="rollback" description="rollback Product Modeling exercise" depends="stop-server" >
+
+		<!-- Delete related categories and products -->
+		<ant antfile="build.xml" target="importImpex" dir="${hybris.root.path}/bin/platform" >
+			<property name="resource" value="${trainingLabToolDir}/${solution.source.dir}/rollback.impex" />
+	    </ant>
+
+	</target>
+
+	
+</project>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Impex exercise tasks">
+
+	<loadproperties srcfile="../lib/exercise.properties" />
+
+	<!-- Import stop-server and clean-slate targets -->
+	<import file="../lib/utility.xml"/>
+
+	<path id="basedir.path">
+		<pathelement path="${basedir}" />
+	</path>
+	<pathconvert property="currentDir" targetos="unix" refid="basedir.path" />
+
+
+	<!--variables -->
+	<property name="solution.source.dir" value="solution" />
+
+	<!--###### Impex - Solution -->
+
+	<target name="solution" depends="stop-server" description="finished Impex exercise">
+		<path id="basedir.path">
+				<pathelement path="${basedir}" />
+		</path>
+		<pathconvert targetos="unix" property="basedir.slashed" refid="basedir.path" />
+
+		<!-- import ImpEx solution files -->
+		<ant antfile="build.xml" target="importImpex" dir="${hybris.root.path}/bin/platform">
+			<property name="resource" value="${basedir.slashed}/${solution.source.dir}/projectdata-impex-exercise.impex" />
+		</ant>
+
+	</target>
+
+</project>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd">
+	
+    <bean id="trainingfacadesSystemSetup" class="my.commerce.trainingfacades.setup.TrainingfacadesSystemSetup">
+        <!-- constructor arg injection example -->
+        <constructor-arg ref="trainingfacadesService"/>
+    </bean>
+
+    <bean id="trainingfacadesService" class="my.commerce.trainingfacades.service.impl.DefaultTrainingfacadesService">
+        <!-- setter injection example -->
+        <property name="modelService" ref="modelService"/>
+        <property name="mediaService" ref="mediaService"/>
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+    
+    <!-- Begin SAP Training: Exercise Facades -->
+	<bean parent="modifyPopulatorList">
+		<property name="list" ref="stockConverter"/>
+		<property name="add" ref="productRestockEstimatePopulator"/>
+	</bean>
+	
+	<alias name="defaultProductRestockEstimatePopulator" alias="productRestockEstimatePopulator"/>
+	<bean id="defaultProductRestockEstimatePopulator" class="my.commerce.trainingfacades.populators.DefaultProductRestockEstimatePopulator">
+		<property name="baseStoreService" ref="baseStoreService"/>
+		<property name="futureStockFacade" ref="futureStockFacade"/>
+		<property name="commerceStockService" ref="commerceStockService"/>
+	</bean>
+    <!-- End SAP Training: Exercise Facades -->
+			
+</beans>

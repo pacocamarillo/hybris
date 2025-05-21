@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+-->
+
+<items 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:noNamespaceSchemaLocation="items.xsd">
+
+	<enumtypes>
+		<enumtype code="RewardStatusLevel" dynamic="false" autocreate="true" generate="true">
+			<!-- TODO step 3: add the missing reward levels -->
+			<!-- Step 3
+				 Create three status levels as: BLUE, SILVER, GOLD (add the missing ones)
+				 They represent the status level that a customer can achieve. Each status level
+				 can provide the customer with different benefits.
+			-->
+
+			<value code="BLUE"></value>
+			<!-- ... -->
+		</enumtype>
+	</enumtypes>
+
+	<relations>
+		<!-- TODO step 2: add the relation definition below -->
+		<!-- Step 2
+			 Create the relation between an EBook and its author(s) here.
+			 The fact that an EBook can have more than one author, and an author can
+			 write more than one EBook, means we need to define a many-to-many relation.
+
+			 	Tip: Remember that a many-to-many relation requires a lookup table
+			 	to store the relation and so avoid a cartesian product
+		-->
+
+		<!-- <relation code="EBook2AuthorRelation" ...>
+			...
+		</relation> -->
+	</relations>
+
+	<itemtypes>
+		<!-- TODO step 1: complete the definition of the EBook itemtype.
+		                        (Remember that EBook is a sub-type of Product) -->
+		<!-- Step 1
+			 Here the main part of this lab:
+			 You need to create a new type representing an EBook product. To do this, according
+			 to the training material, you need to create a new itemtype that extends Product
+			 (to inherit all attributes defined for Product).
+			 You must also define the new EBook type as an object that is distinct from Product itself,
+			 so be careful to set the autocreate and generate attributes to the correct true/false value.
+			 For the full list of attributes that belong to EBook, refer to exercise documentation.
+		-->
+
+		<!-- <itemtype code="EBook" ... >
+			<attributes>
+				...
+			</attributes>
+		</itemtype> -->
+
+		<!-- User, a standard Commerce Cloud type, is modified here to add to its definition
+			 an attribute that refers to the status level created in step 3 (above).
+			 You don't need to change anything here, just try to understand the logic.
+		-->
+		<itemtype code="User" autocreate="false" generate="false">
+			<attributes>
+				<attribute type="RewardStatusLevel" qualifier="rewardStatusLevel">
+					<persistence type="property"></persistence>
+				</attribute>
+			</attributes>
+		</itemtype>
+
+	</itemtypes>
+</items>

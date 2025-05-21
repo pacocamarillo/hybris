@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Example exercise tasks">
+
+	<loadproperties srcfile="../lib/exercise.properties" />
+
+	<!-- Import stop-server and clean-slate targets -->
+	<import file="../lib/utility.xml"/>
+
+	<path id="basedir.path">
+		<pathelement path="${basedir}" />
+	</path>
+	<pathconvert property="currentDir" targetos="unix" refid="basedir.path" />
+
+	<!-- import task definitions to support if/then/else -->
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="../lib/ant-contrib-1.0b3.jar" />
+		</classpath>
+	</taskdef>
+
+	<!--variables -->
+	<property name="extension.name" value="trainingexample" />
+	<property name="setup.source.dir" value="setup" />
+	<property name="solution.source.dir" value="solution" />
+	<property name="target.resdir" value="${hybris.root.path}/bin/custom/${extension.name}/resources/" />
+	<property name="target.javadir" value="${hybris.root.path}/bin/custom/${extension.name}/src/" />
+
+
+	<!--###### Example Exercise - Setup ######-->
+
+	<target name="setup" depends="generate_extension" description="copy starter Example exercise">
+
+		<!-- Create target directories -->
+		<mkdir dir="${target.javadir}/my/commerce/${extension.name}/..."/>
+
+		<!-- copy Java source code -->
+		<copy file="${setup.source.dir}/FILE.java" tofile="${target.javadir}/my/commerce/${extension.name}/.../FILE.java" overwrite="true" />
+
+		<!-- now copy Spring file -->
+		<copy file="${setup.source.dir}/${extension.name}-spring.xml" tofile="${target.resdir}/${extension.name}-spring.xml" overwrite="true" />
+
+		<!-- copy ImpEx file-->
+		<copy file="${setup.source.dir}/projectdata-example.impex" tofile="${target.resdir}/impex/projectdata-example.impex" overwrite="true" />
+
+
+		<!-- build the platform only if you need impex files loaded (with updatesystem) -->
+
+	</target>
+
+
+
+	<!--###### Example Exercise - Solution ######-->
+
+
+	<target name="solution" depends="generate_extension,stop-server" description="copy completed Example exercise">
+
+		<!-- Create target directories -->
+		<mkdir dir="${target.javadir}/my/commerce/${extension.name}/..."/>
+
+		<!-- copy Java source code -->
+		<copy file="${solution.source.dir}/FILE.java" tofile="${target.javadir}/my/commerce/${extension.name}/.../FILE.java" overwrite="true" />
+
+		<!-- now copy Spring file -->
+		<copy file="${solution.source.dir}/${extension.name}-spring.xml" tofile="${target.resdir}/${extension.name}-spring.xml" overwrite="true" />
+
+		<!-- copy ImpEx file-->
+		<copy file="${solution.source.dir}/projectdata-example.impex" tofile="${target.resdir}/impex/projectdata-example.impex" overwrite="true" />
+
+		<!-- build the platform -->
+		<ant antfile="build.xml" target="updatesystem" dir="${hybris.root.path}/bin/platform">
+			<property name="configFile" value="${currentDir}/${solution.source.dir}/config.json" />
+		</ant>
+
+	</target>
+
+
+	<!--###### Example Exercise - utility targets ######-->
+
+	<target name="generate_extension" description="create fresh extension">
+
+		<!-- Reset system back to a clean slate (state following setup) -->
+		<antcall target="clean-slate"/>
+
+		<!-- create archive directory if not already present -->
+		<mkdir dir="${installation.folder}/archive"/>
+
+		<!-- if extension already present in custom, timestamp and move to archive directory -->
+		<if>
+			<available file="${hybris.root.path}/bin/custom/${extension.name}" type="dir" />
+			<then>
+				<!-- archive wcms folder (if present) -->
+				<tstamp>
+					<format property="TIMESTAMP" pattern="yyyy.MM.dd_hh.mm"/>
+				</tstamp>
+				<move file="${hybris.root.path}/bin/custom/${extension.name}"
+        	        tofile="${installation.folder}/archive/${extension.name}_${TIMESTAMP}"/>
+			</then>
+		</if>
+
+		<!-- remove ${extension.name} from localextensions.xml (if present) -->
+		<java classname="groovy.ui.GroovyMain">
+			<classpath>
+				<pathelement location="../lib/groovy-4.0.3.jar" />
+				<pathelement location="../lib/groovy-xml-4.0.3.jar" />
+			</classpath>
+			<arg value="../lib/update_localextensions.groovy" />
+			<arg value="remove" />
+			<arg value="${extension.name}" />
+			<arg value="${hybris.root.path}/config/localextensions.xml" />
+		</java>
+
+		<!-- clean the platform -->
+		<ant antfile="build.xml" target="clean" dir="${hybris.root.path}/bin/platform" />
+
+		<!-- generate the example extension -->
+		<ant antfile="build.xml" target="extgen" dir="${hybris.root.path}/bin/platform">
+			<property name="input.template" value="yempty" />
+			<property name="input.name" value="${extension.name}" />
+			<property name="input.package" value="my.commerce.${extension.name}" />
+			<property name="ext.yempty.path" value="${yempty.dir}" />
+		</ant>
+
+		<!-- add ${extension.name} to localextensions.xml -->
+		<java classname="groovy.ui.GroovyMain">
+			<classpath>
+				<pathelement location="../lib/groovy-4.0.3.jar"/>
+				<pathelement location="../lib/groovy-xml-4.0.3.jar" />
+			</classpath>
+			<arg value="../lib/update_localextensions.groovy"/>
+			<arg value="add"/>
+			<arg value="${extension.name}"/>
+			<arg value="${hybris.root.path}/config/localextensions.xml"/>
+		</java>
+
+		<!-- defer building the platform -->
+
+	</target>
+
+</project>

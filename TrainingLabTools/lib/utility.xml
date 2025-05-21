@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Utility tasks" xmlns:if="ant:if">
+
+	<!-- import task definitions to support if/then/else -->
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="../lib/ant-contrib-1.0b3.jar" />
+		</classpath>
+	</taskdef>
+
+	<!-- 1. clean-slate • Clean Slate restores the Hybris server back to its state post-class setup -->
+    <target name="clean-slate" description="restore server to state it was in following setup">
+        <if>
+           <and>
+               <available file="${installation.folder}/archive/data.zip" type="file" />
+               <available file="${installation.folder}/archive/config.zip" type="file" />
+               <available file="${installation.folder}/archive/bootstrap.zip" type="file" />
+<!--               <available file="${installation.folder}/archive/yacceleratorstorefront.zip" type="file" />
+               <available file="${installation.folder}/archive/ycommercewebservices.zip" type="file" />
+-->           </and>
+           <then>
+               <delete dir="${hybris.root.path}/data"/>
+               <mkdir dir="${hybris.root.path}/data"/>
+	           <unzip src="${installation.folder}/archive/data.zip" dest="${hybris.root.path}/data"/>
+               <delete dir="${hybris.root.path}/config"/>
+               <mkdir dir="${hybris.root.path}/config"/>
+	           <unzip src="${installation.folder}/archive/config.zip" dest="${hybris.root.path}/config"/>
+               <delete dir="${hybris.root.path}/bin/platform/bootstrap"/>
+               <mkdir dir="${hybris.root.path}/bin/platform/bootstrap"/>
+	           <unzip src="${installation.folder}/archive/bootstrap.zip" dest="${hybris.root.path}/bin/platform/bootstrap"/>
+<!--	           <delete dir="${hybris.root.path}/bin/modules/base-accelerator/yacceleratorstorefront"/>
+	           <mkdir dir="${hybris.root.path}/bin/modules/base-accelerator/yacceleratorstorefront"/>
+	           <unzip src="${installation.folder}/archive/yacceleratorstorefront.zip"
+	                 dest="${hybris.root.path}/bin/modules/base-accelerator/yacceleratorstorefront"/>
+	           <delete dir="${hybris.root.path}/bin/modules/commerce-services/ycommercewebservices"/>
+	           <mkdir dir="${hybris.root.path}/bin/modules/commerce-services/ycommercewebservices"/>
+	           <unzip src="${installation.folder}/archive/ycommercewebservices.zip"
+	                 dest="${hybris.root.path}/bin/modules/commerce-services/ycommercewebservices"/>
+-->
+	           <!-- Do not restore verification extension, as scripts are already loaded into archived db. -->
+               <echo>Restored server to blank slate.</echo>
+           </then>
+           <else>
+               <echo>WARNING: unable to restore server to blank slate. One or more archived zip file(s) not present.</echo>
+           </else>
+        </if>
+    </target>
+
+
+    <!-- 2. stop-server • Elegant cross-platform solution to stop the Hybris server -->
+
+		<condition property="isOSUnix">
+			<os family="unix" />
+		</condition>
+
+		<condition property="isOSWindows">
+			<os family="windows" />
+		</condition>
+
+		<target name="stop-server-windows" if="isOSWindows">
+			<loadfile property="ypid"
+			          srcFile="${hybris.root.path}/data/hybristomcat.java.pid" failonerror="false">
+			    <filterchain>
+			        <striplinebreaks/>
+			    </filterchain>
+			</loadfile>
+			<exec if:set="ypid" executable="../lib/windows-kill.exe">
+				<arg line="-SIGINT"/>
+		        <arg line="${ypid}"/>
+		    </exec>
+			<waitfor if:set="ypid">
+				<not>
+		      		<available file="${hybris.root.path}/data/hybristomcat.java.pid"/>
+		    	</not>
+			</waitfor>
+		</target>
+
+		<target name="stop-server-unix" if="isOSUnix">
+			<exec dir="${hybris.root.path}/bin/platform" executable="./hybrisserver.sh">
+		     	<arg line="stop"/>
+			</exec>
+		</target>
+
+		<target name="stop-server" depends="stop-server-windows, stop-server-unix" />
+
+</project>

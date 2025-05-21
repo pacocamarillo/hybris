@@ -1,0 +1,31 @@
+$productCatalog=electronicsProductCatalog
+$catalogVersion=catalogversion(catalog(id[default=$productCatalog]),version[default='Staged'])[unique=true,default=$productCatalog:Staged]
+$categorysupercategories=source(code, $catalogVersion)[unique=true]
+$categories=target(code, $catalogVersion)[unique=true]
+
+### SOLUTION Part 1
+INSERT_UPDATE Category;code[unique=true];name;allowedPrincipals(uid)[default='customergroup'];$catalogVersion
+;sapSponsored;sponsored by SAP;;
+
+$productsupercategories=supercategories(code, $catalogVersion)
+
+### SOLUTION Part 2
+INSERT_UPDATE Product;code[unique=true];name;$catalogVersion;$productsupercategories
+;commerceSDCard;SD Card powered by SAP Commerce;;sapSponsored
+
+$classCatalogVersion=catalogversion(catalog(id[default='ElectronicsClassification']),version[default='1.0'])[unique=true,default='ElectronicsClassification:1.0']
+$classifyingsupercategories=source(code, $classCatalogVersion)[unique=true]
+
+INSERT_UPDATE CategoryCategoryRelation;$categories;$classifyingsupercategories
+;sapSponsored;828 
+
+$clAttrModifiers=system='ElectronicsClassification',version='1.0',translator=de.hybris.platform.catalog.jalo.classification.impex.ClassificationAttributeTranslator, lang=en
+$feature5=@Internal memory, 6[$clAttrModifiers];  # Internal memory in megabyte (MB)
+$feature8=@Read speed, 1644[$clAttrModifiers];  # Read speed in megabyte per second (MB/s)
+$feature9=@Flash card type, 2305[$clAttrModifiers];  # Flash card type
+
+$approved=approvalstatus(code)[default='approved']
+
+### SOLUTION Part 3
+UPDATE Product;code[unique=true];$feature5;$feature8;$feature9;$catalogVersion;$approved
+;commerceSDCard;16384;100;Secure Digital High-Capacity (SDHC);;

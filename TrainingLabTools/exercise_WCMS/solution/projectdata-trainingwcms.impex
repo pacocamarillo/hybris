@@ -1,0 +1,28 @@
+$contentCatalog=electronics-spaContentCatalog
+$contentCV=catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]),CatalogVersion.version[default=Staged])[default=$contentCatalog:Staged]
+
+$siteResource=jar:my.commerce.trainingwcms.constants.TrainingwcmsConstants&/media
+$medias=medias(code, $contentCV);
+$mediaContainer=media(qualifier, $contentCV);
+
+
+#Import medias, media containers and banners
+INSERT_UPDATE Media;mediaFormat(qualifier);code[unique=true];@media[translator=de.hybris.platform.impex.jalo.media.MediaDataTranslator][forceWrite=true];realfilename;altText;mime[default='image/jpeg'];$contentCV[unique=true];folder(qualifier)[default=images];
+;mobile;WCMSExercise_Mobile.png;$siteResource/WCMSExercise_Mobile.png;WCMSExercise_Mobile.png;"HomeSpeedMVC";
+;tablet;WCMSExercise_Tablet.png;$siteResource/WCMSExercise_Tablet.png;WCMSExercise_Tablet.png;"HomeSpeedMVC";
+;desktop;WCMSExercise_Desktop.png;$siteResource/WCMSExercise_Desktop.png;WCMSExercise_Desktop.png;"HomeSpeedMVC";
+;widescreen;WCMSExercise_Widescreen.png;$siteResource/WCMSExercise_Widescreen.png;WCMSExercise_Widescreen.png;"HomeSpeedMVC"; 
+ 
+INSERT_UPDATE MediaContainer;qualifier[unique=true];$medias;$contentCV[unique=true]
+;homeSpeedMVCMediaContainer;WCMSExercise_Widescreen.png,WCMSExercise_Desktop.png,WCMSExercise_Tablet.png,WCMSExercise_Mobile.png
+
+
+INSERT_UPDATE AnnotatedResponsiveBannerComponent;$contentCV[unique=true];uid[unique=true];$mediaContainer;name;urlLink;title;restrictions(uid,$contentCV);&componentRef
+;;homeSpeedMVCBannerComponent;homeSpeedMVCMediaContainer;Training Customized Homepage Splash MVC Banner;/;"Take Your E-Commerce to the Next Level";loggedInUser;homeSpeedMVCBannerComponent
+
+
+UPDATE ComponentTypeGroup;code[unique=true];cmsComponentTypes(code)[mode=append]
+                         ;wide             ;AnnotatedResponsiveBannerComponent
+
+INSERT_UPDATE ContentSlot;$contentCV[unique=true];uid[unique=true]     ;cmsComponents(uid, $contentCV)[mode=replace]
+                         ;                       ;Section1Slot-Homepage;homeSpeedMVCBannerComponent,ElectronicsHompageSplashBannerComponent,ElectronicsHompageDiscountBannerComponent
